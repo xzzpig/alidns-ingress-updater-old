@@ -39,7 +39,7 @@ func TestDnsUtils(t *testing.T) {
 		panic(err)
 	}
 	for _, account := range accounts.Items {
-		if account.Name != "xzzpig-alidns-account" {
+		if account.Name != "fae2ly-alidns-account" {
 			continue
 		}
 		dnsUtils, err := utils.NewAliDnsUtils(account.Spec)
@@ -47,18 +47,38 @@ func TestDnsUtils(t *testing.T) {
 			t.Error(err)
 		}
 		t.Log(dnsUtils.GetRecordCount())
-		recordId, err := dnsUtils.CreateRecord("test", "1.1.1.1", "A")
-		t.Log("CreateRecord", recordId)
-		err = dnsUtils.UpdateRecord(recordId, "test", "1.1.1.2", "A")
+		records, err := dnsUtils.ListRecords()
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log("UpdateRecord", err)
-		err = dnsUtils.DeleteRecord(recordId)
-		if err != nil {
-			t.Error(err)
+		for _, record := range records {
+			fmt.Println(*record.RR)
+			if strings.HasPrefix(*record.RR, "_dnsauth") {
+				fmt.Println("Delete ", *record.RR)
+				err = dnsUtils.DeleteRecord(*record.RecordId)
+				if err != nil {
+					t.Error(err)
+				}
+			}
 		}
-		t.Log("DeleteRecord", err)
+
+		// recordId, err := dnsUtils.CreateRecord("monitor-lan", "192.168.0.141", "A")
+		// t.Log("CreateRecord", recordId)
+		// recordId, err = dnsUtils.CreateRecord("code-lan", "192.168.0.100", "A")
+		// t.Log("CreateRecord", recordId)
+		// recordId, err = dnsUtils.CreateRecord("nas-lan", "192.168.0.166", "A")
+		// t.Log("CreateRecord", recordId)
+
+		// err = dnsUtils.UpdateRecord(recordId, "test", "1.1.1.2", "A")
+		// if err != nil {
+		// 	t.Error(err)
+		// }
+		// t.Log("UpdateRecord", err)
+		// err = dnsUtils.DeleteRecord(recordId)
+		// if err != nil {
+		// 	t.Error(err)
+		// }
+		// t.Log("DeleteRecord", err)
 	}
 }
 
@@ -103,4 +123,8 @@ func TestListIngresses(t *testing.T) {
 	for _, ingress := range ingresses.Items {
 		t.Log(ingress.Name)
 	}
+}
+
+func TestGetIp(t *testing.T) {
+	fmt.Println(utils.GetPublicIP())
 }
