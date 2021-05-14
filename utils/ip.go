@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +15,7 @@ type PublicIP struct {
 }
 
 func GetPublicIP() (string, error) {
-	resp, err := http.Get("https://ip.cn/api/index?ip=&type=0")
+	resp, err := http.Get("https://v6r.ipip.net/")
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +24,8 @@ func GetPublicIP() (string, error) {
 		return "", errors.New("Error Status" + resp.Status)
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
-	var publicIp PublicIP
-	json.Unmarshal(body, &publicIp)
-	return publicIp.IP, nil
+	return string(body), nil
+	// var publicIp PublicIP
+	// json.Unmarshal(body, &publicIp)
+	// return publicIp.IP, nil
 }

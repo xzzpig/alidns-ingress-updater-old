@@ -1,6 +1,7 @@
 package utils_test
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,31 @@ func TestListAliDNSAccounts(t *testing.T) {
 	for _, account := range accounts.Items {
 		t.Log(account.Name)
 	}
+}
+
+func TestGetDnsUtils(t *testing.T) {
+	fmt.Println(GetDnsUtils("kapp.fae2ly.com"))
+}
+
+func GetDnsUtils(host string) (util *utils.AliDnsUtils, rr string, err error) {
+	home := homedir.HomeDir()
+	config := filepath.Join(home, ".kube", "config")
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", config)
+	accounts, err := utils.ListAliDNSAccounts(kubeConfig)
+	if err != nil {
+		return nil, "", err
+	}
+	for _, account := range accounts.Items {
+		domainName := "." + account.Spec.DomainName
+		if strings.HasSuffix(host, domainName) {
+			util, err := utils.NewAliDnsUtils(account.Spec)
+			if err != nil {
+				return nil, "", err
+			}
+			return util, strings.ReplaceAll(host, domainName, ""), nil
+		}
+	}
+	return nil, "", errors.New("No Account Found")
 }
 
 func TestDnsUtils(t *testing.T) {
@@ -121,7 +147,9 @@ func TestListIngresses(t *testing.T) {
 		panic(err)
 	}
 	for _, ingress := range ingresses.Items {
-		t.Log(ingress.Name)
+		for _, rule := range ingress.Spec.Rules {
+			t.Log(rule.Host)
+		}
 	}
 }
 

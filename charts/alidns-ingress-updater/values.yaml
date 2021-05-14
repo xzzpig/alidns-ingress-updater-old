@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: xzzpig/alidnsingressupdater
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.0.2"
 
 imagePullSecrets: []
 
